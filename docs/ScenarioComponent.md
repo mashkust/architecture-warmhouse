@@ -20,16 +20,16 @@ Container_Ext(telemetry_service, "Telemetry Service", "Сбор данных и 
 Container_Ext(device_service, "Device Service", "Устройства и команды")
 
 
-Rel(scenario_api, scenario_repository, "CRUD сценариев")
-Rel(scenario_api, rule_engine, "Запуск")
+Rel(scenario_api, scenario_repository, "CRUD")
+Rel(scenario_api, rule_engine, "Инициация выполнения сценариев")
 
-Rel(rule_engine, scenario_repository, "Чтение")
-Rel(rule_engine, telemetry_adapter, "Данные")
-Rel(rule_engine, device_adapter, "Команды")
+Rel(rule_engine, scenario_repository, "Получение правил, условий и действий сценария")
+Rel(rule_engine, telemetry_adapter, "Получение телеметрических данных для проверки условий")
+Rel(rule_engine, device_adapter, "Передача команд для выполнения действий сценария")
 
-Rel(scenario_repository, scenario_db, "SQL")
-Rel(telemetry_adapter, telemetry_service, "gRPC")
-Rel(device_adapter, device_service, "gRPC")
+Rel(scenario_repository, scenario_db, "Чтение и запись", "SQL")
+Rel(telemetry_adapter, telemetry_service, "", "gRPC")
+Rel(device_adapter, device_service, "", "gRPC")
 
 @enduml
 

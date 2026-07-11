@@ -13,7 +13,7 @@ System_Ext(devices, "Умные устройства", "Датчики и исп
 
 System_Boundary(smart_home, "Система «Умный дом»") {
 
-  Container(web_app, "Веб-приложение", "React + TypeScript", "Интерфейс пользователей и администраторов")
+  Container(web_app, "Web application", "React + TypeScript", "Интерфейс пользователей и администраторов")
 
   Container(api_gateway, "API Gateway", "Nginx", "Единая точка входа и маршрутизация запросов")
 

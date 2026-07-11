@@ -16,14 +16,14 @@ Container_Boundary(device_service, "Device Service") {
 ContainerDb(device_db, "Device DB", "PostgreSQL", "Устройства, типы, настройки")
 System_Ext(devices, "Умные устройства", "Физические устройства")
 
-Rel(device_api, device_registry, "CRUD устройств")
-Rel(device_api, command_manager, "Команды")
+Rel(device_api, device_registry, "CRUD")
+Rel(device_api, command_manager, "Инициация отправки управляющих команд")
 
-Rel(device_registry, device_repository, "CRUD устройств")
-Rel(command_manager, device_repository, "Чтение")
+Rel(device_registry, device_repository, "Доступ к данным устройств и их конфигурации")
+Rel(command_manager, device_repository, "Получение данных устройств и параметров конфигурации")
 
-Rel(command_manager, devices, "Команды")
-Rel(device_repository, device_db, "SQL")
+Rel(command_manager, devices, "Передача управляющих команд устройствам")
+Rel(device_repository, device_db, "Чтение и запись", "SQL")
 
 @enduml
 

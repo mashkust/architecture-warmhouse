@@ -24,6 +24,14 @@ entity House {
   created_at : timestamp
 }
 
+entity Room {
+  *id : bigint <<PK>>
+  --
+  house_id : bigint <<FK>>
+  name : varchar
+  room_type : varchar
+}
+
 entity DeviceType {
   *id : bigint <<PK>>
   --
@@ -37,11 +45,21 @@ entity Device {
   --
   type_id : bigint <<FK>>
   house_id : bigint <<FK>>
+  room_id : bigint <<FK>> <<nullable>>
   serial_number : varchar
   name : varchar
-  location : varchar
   status : varchar
   created_at : timestamp
+}
+
+entity DeviceConfiguration {
+  *id : bigint <<PK>>
+  --
+  device_id : bigint <<FK>>
+  key : varchar
+  value : varchar
+  value_type : varchar
+  updated_at : timestamp
 }
 
 entity TelemetryData {
@@ -67,8 +85,11 @@ entity ScenarioCondition {
   *id : bigint <<PK>>
   --
   scenario_id : bigint <<FK>>
-  device_id : bigint <<FK>>
+  scope_type : varchar
+  device_id : bigint <<FK>> <<nullable>>
+  room_id : bigint <<FK>> <<nullable>>
   metric : varchar
+  aggregation_type : varchar
   operator : varchar
   target_value : decimal
 }
@@ -83,14 +104,18 @@ entity ScenarioAction {
 }
 
 User ||--o{ House : owns
+House ||--o{ Room : contains
 House ||--o{ Device : contains
+Room ||--o{ Device : contains
 DeviceType ||--o{ Device : defines
+Device ||--o{ DeviceConfiguration : has
 Device ||--o{ TelemetryData : generates
 House ||--o{ Scenario : has
 Scenario ||--o{ ScenarioCondition : includes
 Scenario ||--o{ ScenarioAction : includes
-Device ||--o{ ScenarioCondition : used in
-Device ||--o{ ScenarioAction : target of
+Device ||--o{ ScenarioCondition : source device
+Room ||--o{ ScenarioCondition : source room
+Device ||--o{ ScenarioAction : target device
 
 @enduml
 
