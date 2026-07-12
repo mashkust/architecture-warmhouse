@@ -62,7 +62,7 @@ entity DeviceConfiguration {
   updated_at : timestamp
 }
 
-entity TelemetryData {
+entity Telemetry {
   *id : bigint <<PK>>
   --
   device_id : bigint <<FK>>
@@ -109,7 +109,7 @@ House ||--o{ Device : contains
 Room ||--o{ Device : contains
 DeviceType ||--o{ Device : defines
 Device ||--o{ DeviceConfiguration : has
-Device ||--o{ TelemetryData : generates
+Device ||--o{ Telemetry : generates
 House ||--o{ Scenario : has
 Scenario ||--o{ ScenarioCondition : includes
 Scenario ||--o{ ScenarioAction : includes
