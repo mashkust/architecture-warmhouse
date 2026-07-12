@@ -65,7 +65,7 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-[Диаграмма контекста](./docs/AsIsContext.md)
+[Диаграмма контекста](./AsIsContext.md)
 
 # Задание 2. Проектирование микросервисной архитектуры
 
@@ -87,21 +87,21 @@ To-Be: микросервисная архитектура
 
 **Диаграмма контейнеров (Containers)**
 
-[Диаграмма контейнеров](./docs/Container.md)
+[Диаграмма контейнеров](./Container.md)
 
 **Диаграмма компонентов (Components)**
 
-[Диаграмма компонента Device Service](./docs/DeviceComponent.md)
+[Диаграмма компонента Device Service](./DeviceComponent.md)
 
-[Диаграмма компонента Scenario Service](./docs/ScenarioComponent.md)
+[Диаграмма компонента Scenario Service](./ScenarioComponent.md)
 
 **Диаграмма кода (Code)**
 
-[Диаграмма кода Device Service](./docs/Code.md)
+[Диаграмма кода Device Service](./Code.md)
 
 # Задание 3. Разработка ER-диаграммы
 
-[ER](./docs/ER.md)
+[ER](./ER.md)
 
 1. один `User` - много `House`
 2. один `House` - много `Room`
@@ -127,7 +127,7 @@ AsyncAPI может применяться для взаимодействия �
 
 ### 2. Документация API
 
-[Документация API](./docs/openapi.yaml)
+[Документация API](../openapi.yaml)
 
 # Задание 5. Работа с docker и docker-compose
 

@@ -4,14 +4,14 @@ import (
 	"time"
 )
 
-// SensorType represents the type of sensor
+// SensorType представляет тип датчика
 type SensorType string
 
 const (
 	Temperature SensorType = "temperature"
 )
 
-// Sensor represents a smart home sensor
+// Sensor представляет собой датчик умного дома
 type Sensor struct {
 	ID          int        `json:"id"`
 	Name        string     `json:"name"`
@@ -24,7 +24,7 @@ type Sensor struct {
 	CreatedAt   time.Time  `json:"created_at"`
 }
 
-// SensorCreate represents the data needed to create a new sensor
+// SensorCreate представляет собой данные, необходимые для создания нового датчика
 type SensorCreate struct {
 	Name     string     `json:"name" binding:"required"`
 	Type     SensorType `json:"type" binding:"required"`
@@ -32,7 +32,7 @@ type SensorCreate struct {
 	Unit     string     `json:"unit"`
 }
 
-// SensorUpdate represents the data that can be updated for a sensor
+// SensorUpdate представляет собой данные, которые могут быть обновлены для датчика
 type SensorUpdate struct {
 	Name     string     `json:"name"`
 	Type     SensorType `json:"type"`

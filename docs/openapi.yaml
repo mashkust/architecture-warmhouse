@@ -1,0 +1,605 @@
+openapi: 3.0.3
+info:
+  title: API системы «Умный дом»
+  version: 1.0.0
+  description: Документация REST API для микросервисной системы «Умный дом»
+
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+
+tags:
+  - name: Сервис устройств
+    description: Операции для получения информации об устройствах и отправки команд
+  - name: Сервис сценариев
+    description: Операции для создания и получения сценариев автоматизации
+
+paths:
+  /devices/{deviceId}:
+    get:
+      tags:
+        - Сервис устройств
+      summary: Получить информацию об устройстве
+      operationId: getDeviceById
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: Идентификатор устройства
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Устройство найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceResponse"
+              examples:
+                success:
+                  summary: Пример успешного ответа
+                  value:
+                    id: 101
+                    typeId: 10
+                    houseId: 1
+                    roomId: 3
+                    serialNumber: "SN-001"
+                    name: "Датчик в гостиной"
+                    status: "active"
+                    createdAt: "2026-07-08T10:00:00Z"
+        "404":
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  summary: Устройство отсутствует
+                  value:
+                    code: "DEVICE_NOT_FOUND"
+                    message: "Устройство не найдено"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                serverError:
+                  summary: Ошибка сервера
+                  value:
+                    code: "INTERNAL_ERROR"
+                    message: "Внутренняя ошибка сервера"
+
+  /devices/{deviceId}/commands:
+    post:
+      tags:
+        - Сервис устройств
+      summary: Отправить команду устройству
+      operationId: sendDeviceCommand
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: Идентификатор устройства
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        description: Команда, отправляемая устройству
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceCommandRequest"
+            examples:
+              turnOn:
+                summary: Пример команды включения
+                value:
+                  command: "turn_on"
+                  value: "true"
+      responses:
+        "202":
+          description: Команда принята в обработку
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommandResponse"
+              examples:
+                accepted:
+                  summary: Команда успешно принята
+                  value:
+                    deviceId: 101
+                    command: "turn_on"
+                    status: "accepted"
+        "400":
+          description: Некорректная команда
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidCommand:
+                  summary: Ошибка в команде
+                  value:
+                    code: "INVALID_COMMAND"
+                    message: "Некорректная команда"
+        "404":
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  summary: Устройство отсутствует
+                  value:
+                    code: "DEVICE_NOT_FOUND"
+                    message: "Устройство не найдено"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                serverError:
+                  summary: Ошибка сервера
+                  value:
+                    code: "INTERNAL_ERROR"
+                    message: "Внутренняя ошибка сервера"
+
+  /scenarios:
+    post:
+      tags:
+        - Сервис сценариев
+      summary: Создать сценарий автоматизации
+      operationId: createScenario
+      requestBody:
+        required: true
+        description: Описание нового сценария автоматизации
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScenarioCreateRequest"
+            examples:
+              roomScenario:
+                summary: Сценарий по средней температуре в комнате
+                value:
+                  houseId: 1
+                  name: "Выключить отопление, если в комнате тепло"
+                  isActive: true
+                  conditions:
+                    - scopeType: "room"
+                      roomId: 3
+                      metric: "temperature"
+                      aggregationType: "avg"
+                      operator: ">"
+                      targetValue: 24
+                  actions:
+                    - deviceId: 401
+                      command: "turn_off"
+                      value: "false"
+              deviceScenario:
+                summary: Сценарий по показанию одного датчика
+                value:
+                  houseId: 1
+                  name: "Включить свет при обнаружении движения"
+                  isActive: true
+                  conditions:
+                    - scopeType: "device"
+                      deviceId: 301
+                      metric: "motion"
+                      aggregationType: "single"
+                      operator: "="
+                      targetValue: 1
+                  actions:
+                    - deviceId: 402
+                      command: "turn_on"
+                      value: "true"
+      responses:
+        "201":
+          description: Сценарий успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioResponse"
+              examples:
+                created:
+                  summary: Сценарий создан
+                  value:
+                    id: 501
+                    houseId: 1
+                    name: "Выключить отопление, если в комнате тепло"
+                    isActive: true
+                    createdAt: "2026-07-08T11:00:00Z"
+        "400":
+          description: Некорректное тело запроса
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidScenario:
+                  summary: Ошибка в описании сценария
+                  value:
+                    code: "INVALID_SCENARIO"
+                    message: "Некорректное описание сценария"
+        "404":
+          description: Дом, комната или устройство не найдены
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  summary: Связанный ресурс не найден
+                  value:
+                    code: "RESOURCE_NOT_FOUND"
+                    message: "Дом, комната или устройство не найдены"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                serverError:
+                  summary: Ошибка сервера
+                  value:
+                    code: "INTERNAL_ERROR"
+                    message: "Внутренняя ошибка сервера"
+
+  /scenarios/{scenarioId}:
+    get:
+      tags:
+        - Сервис сценариев
+      summary: Получить информацию о сценарии
+      operationId: getScenarioById
+      parameters:
+        - name: scenarioId
+          in: path
+          required: true
+          description: Идентификатор сценария
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Сценарий найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioDetailsResponse"
+              examples:
+                success:
+                  summary: Пример успешного ответа
+                  value:
+                    id: 501
+                    houseId: 1
+                    name: "Выключить отопление, если в комнате тепло"
+                    isActive: true
+                    createdAt: "2026-07-08T11:00:00Z"
+                    conditions:
+                      - scopeType: "room"
+                        roomId: 3
+                        metric: "temperature"
+                        aggregationType: "avg"
+                        operator: ">"
+                        targetValue: 24
+                    actions:
+                      - deviceId: 401
+                        command: "turn_off"
+                        value: "false"
+        "404":
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  summary: Сценарий отсутствует
+                  value:
+                    code: "SCENARIO_NOT_FOUND"
+                    message: "Сценарий не найден"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                serverError:
+                  summary: Ошибка сервера
+                  value:
+                    code: "INTERNAL_ERROR"
+                    message: "Внутренняя ошибка сервера"
+
+components:
+  schemas:
+    DeviceResponse:
+      type: object
+      description: Информация об устройстве
+      required:
+        - id
+        - typeId
+        - houseId
+        - serialNumber
+        - name
+        - status
+        - createdAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор устройства
+        typeId:
+          type: integer
+          format: int64
+          description: Идентификатор типа устройства
+        houseId:
+          type: integer
+          format: int64
+          description: Идентификатор дома
+        roomId:
+          type: integer
+          format: int64
+          nullable: true
+          description: Идентификатор комнаты
+        serialNumber:
+          type: string
+          description: Серийный номер устройства
+        name:
+          type: string
+          description: Название устройства
+        status:
+          type: string
+          description: Текущее состояние устройства
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время регистрации устройства
+
+    DeviceCommandRequest:
+      type: object
+      description: Запрос на отправку команды устройству
+      required:
+        - command
+      properties:
+        command:
+          type: string
+          description: Имя команды
+        value:
+          type: string
+          nullable: true
+          description: Дополнительное значение команды
+
+    CommandResponse:
+      type: object
+      description: Результат принятия команды устройству
+      required:
+        - deviceId
+        - command
+        - status
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Идентификатор устройства
+        command:
+          type: string
+          description: Отправленная команда
+        status:
+          type: string
+          description: Статус обработки команды
+
+    ScenarioConditionDeviceRequest:
+      type: object
+      description: Условие сценария для конкретного устройства
+      required:
+        - scopeType
+        - deviceId
+        - metric
+        - aggregationType
+        - operator
+        - targetValue
+      properties:
+        scopeType:
+          type: string
+          enum: [device]
+          description: Область применения условия
+        deviceId:
+          type: integer
+          format: int64
+          description: Идентификатор устройства
+        metric:
+          type: string
+          description: Метрика, по которой проверяется условие
+        aggregationType:
+          type: string
+          enum: [single, avg, min, max, any]
+          description: Тип агрегации значения
+        operator:
+          type: string
+          description: Оператор сравнения
+        targetValue:
+          type: number
+          format: double
+          description: Целевое значение для сравнения
+
+    ScenarioConditionRoomRequest:
+      type: object
+      description: Условие сценария для комнаты
+      required:
+        - scopeType
+        - roomId
+        - metric
+        - aggregationType
+        - operator
+        - targetValue
+      properties:
+        scopeType:
+          type: string
+          enum: [room]
+          description: Область применения условия
+        roomId:
+          type: integer
+          format: int64
+          description: Идентификатор комнаты
+        metric:
+          type: string
+          description: Метрика, по которой проверяется условие
+        aggregationType:
+          type: string
+          enum: [single, avg, min, max, any]
+          description: Тип агрегации значения
+        operator:
+          type: string
+          description: Оператор сравнения
+        targetValue:
+          type: number
+          format: double
+          description: Целевое значение для сравнения
+
+    ScenarioConditionRequest:
+      oneOf:
+        - $ref: "#/components/schemas/ScenarioConditionDeviceRequest"
+        - $ref: "#/components/schemas/ScenarioConditionRoomRequest"
+      description: Условие сценария, привязанное либо к устройству, либо к комнате
+
+    ScenarioActionRequest:
+      type: object
+      description: Действие, выполняемое при срабатывании сценария
+      required:
+        - deviceId
+        - command
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Идентификатор целевого устройства
+        command:
+          type: string
+          description: Команда для устройства
+        value:
+          type: string
+          nullable: true
+          description: Дополнительное значение команды
+
+    ScenarioCreateRequest:
+      type: object
+      description: Запрос на создание сценария автоматизации
+      required:
+        - houseId
+        - name
+        - isActive
+        - conditions
+        - actions
+      properties:
+        houseId:
+          type: integer
+          format: int64
+          description: Идентификатор дома
+        name:
+          type: string
+          description: Название сценария
+        isActive:
+          type: boolean
+          description: Признак активности сценария
+        conditions:
+          type: array
+          description: Список условий сценария
+          items:
+            $ref: "#/components/schemas/ScenarioConditionRequest"
+        actions:
+          type: array
+          description: Список действий сценария
+          items:
+            $ref: "#/components/schemas/ScenarioActionRequest"
+
+    ScenarioResponse:
+      type: object
+      description: Краткая информация о созданном сценарии
+      required:
+        - id
+        - houseId
+        - name
+        - isActive
+        - createdAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор сценария
+        houseId:
+          type: integer
+          format: int64
+          description: Идентификатор дома
+        name:
+          type: string
+          description: Название сценария
+        isActive:
+          type: boolean
+          description: Признак активности сценария
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время создания сценария
+
+    ScenarioDetailsResponse:
+      type: object
+      description: Полная информация о сценарии
+      required:
+        - id
+        - houseId
+        - name
+        - isActive
+        - createdAt
+        - conditions
+        - actions
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор сценария
+        houseId:
+          type: integer
+          format: int64
+          description: Идентификатор дома
+        name:
+          type: string
+          description: Название сценария
+        isActive:
+          type: boolean
+          description: Признак активности сценария
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время создания сценария
+        conditions:
+          type: array
+          description: Условия сценария
+          items:
+            $ref: "#/components/schemas/ScenarioConditionRequest"
+        actions:
+          type: array
+          description: Действия сценария
+          items:
+            $ref: "#/components/schemas/ScenarioActionRequest"
+
+    ErrorResponse:
+      type: object
+      description: Структура ответа при ошибке
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Машинно-читаемый код ошибки
+        message:
+          type: string
+          description: Текстовое описание ошибки
